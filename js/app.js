@@ -13,6 +13,9 @@ const productsDom = document.querySelector(".products-center");
 // cart 
 let cart = [];
 
+// cart buttons
+let buttonsDom = [];
+
 // getting the products
 class Products {
     async getProducts() {
@@ -23,14 +26,14 @@ class Products {
             let products = json.items; // json.items is object array
 
             products = products.map(itemInProducts => { // looping each item in products array, map to simple object and return object array
-                const{title, price} = itemInProducts.fields;
-                const{id} = itemInProducts.sys;
+                const { title, price } = itemInProducts.fields;
+                const { id } = itemInProducts.sys;
                 const image = itemInProducts.fields.image.fields.file.url;
-                return {title, price, id, image};
+                return { title, price, id, image };
             });
 
             return products; // object array
-            
+
         } catch (error) {
             console.log(error);
         }
@@ -61,17 +64,49 @@ class UI {
         });
         productsDom.innerHTML = productUI;
     }
+
+    getBagButtons() {
+        const buttons = [...document.querySelectorAll(".bag-btn")];// get NodeList and spread in an array
+        buttonsDom = buttons;// set btn array to buttonsDom array for checking item in a cart or not there.
+        
+        buttons.forEach(button => {
+            let id = button.dataset.id;
+            let itemInCart = cart.find(item => item.id === id);// Initially cart array is empty
+            if (itemInCart) {
+                button.innerText = "In Cart";
+                button.disabled = true;
+            }
+            button.addEventListener("click", event => {
+                event.target.innerText = "In Cart";
+                event.target.disabled = true;
+
+                // get product from products
+                // add product to the cart
+                // save cart in local storage
+                // set cart values
+                // display cart item
+                // show the cart
+            });
+        })
+    }
 }
 
 // local storage
 class Storage {
-
+    static saveProducts(products) {
+        localStorage.setItem("products", JSON.stringify(products));
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     const ui = new UI();
     const products = new Products();
 
-    // get all products
-    products.getProducts().then(products => ui.displayProduct(products));
+    // get all products and save in local storage
+    products.getProducts().then(products => {
+        ui.displayProduct(products);
+        Storage.saveProducts(products);
+    }).then(() => {
+        ui.getBagButtons();
+    });
 });
