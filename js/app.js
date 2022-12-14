@@ -1,7 +1,7 @@
 // variables
 
 const cartBtn = document.querySelector(".cart-btn");
-const closeBtn = document.querySelector(".close-cart");
+const closeCartBtn = document.querySelector(".close-cart");
 const clearCartBtn = document.querySelector(".close-cart");
 const cartDom = document.querySelector(".cart");
 const cartOverlay = document.querySelector(".cart-overlay");
@@ -98,6 +98,7 @@ class UI {
                 this.displayCartItem(cartItems);
 
                 // show the cart
+                this.showCart();
             });
         });
     }
@@ -111,8 +112,8 @@ class UI {
             itemsTotal += item.amount;
         });
 
-        cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
-        cartItems.innerText = itemsTotal;
+        cartTotal.innerText = parseFloat(tempTotal.toFixed(2));// cartTotal exist in navbar
+        cartItems.innerText = itemsTotal;// cartItems exist in cart
     }
 
     displayCartItem(item) {
@@ -132,15 +133,37 @@ class UI {
             </div>
         `;
         cartContent.appendChild(div);
-
-        // This following two lines are only using for testing prupose and these will delete later
-        cartOverlay.style.visibility = "visible";
-        cartDom.style.transform = "translateX(0)";
     }
+
+    showCart() {
+        cartOverlay.classList.add("transparentBcg");
+        cartDom.classList.add("showCart");
+    }
+
+    setupAPP() {
+        cart = Storage.getCart();// get cart from localStorage
+        this.setCartValues(cart);// set items in cart total price and total item
+        this.populateCart(cart);// set cart items array from localStorage in cart
+        cartBtn.addEventListener('click', this.showCart);// if user clicks the cart icon on navbar
+        closeCartBtn.addEventListener('click', this.hideCart);// if user clicks the close button on cart
+    }
+
+    // set cart items array from localStorage in cart
+    populateCart(cart) {
+        cart.forEach(item => this.displayCartItem(item));
+    }
+
+    // card hidding function
+    hideCart() {
+        cartOverlay.classList.remove("transparentBcg");
+        cartDom.classList.remove("showCart");
+    }
+
 }
 
 // local storage
 class Storage {
+    // save products to local storage
     static saveProducts(products) {
         localStorage.setItem("products", JSON.stringify(products));
     }
@@ -155,11 +178,18 @@ class Storage {
     static saveCart(cart) {
         localStorage.setItem("cart", JSON.stringify(cart));
     }
+
+    // if cart is already exit in Local Storage or not return empty array
+    static getCart() {
+        return localStorage.getItem("cart") ? JSON.parse(localStorage.getItem("cart")) : [];
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     const ui = new UI();
     const products = new Products();
+
+    ui.setupAPP();
 
     // get all products and save in local storage
     products.getProducts().then(products => {
