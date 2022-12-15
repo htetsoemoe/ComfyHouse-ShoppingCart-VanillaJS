@@ -2,7 +2,7 @@
 
 const cartBtn = document.querySelector(".cart-btn");
 const closeCartBtn = document.querySelector(".close-cart");
-const clearCartBtn = document.querySelector(".close-cart");
+const clearCartBtn = document.querySelector(".clear-cart");
 const cartDom = document.querySelector(".cart");
 const cartOverlay = document.querySelector(".cart-overlay");
 const cartItems = document.querySelector(".cart-items");
@@ -159,6 +159,38 @@ class UI {
         cartDom.classList.remove("showCart");
     }
 
+    // cart logic 
+    cartLogic() {
+        clearCartBtn.addEventListener('click', () => {
+            this.clearCart();
+        })
+    }
+
+    clearCart() {
+        let cartItemIds = cart.map(item => item.id);
+        cartItemIds.forEach(id => this.removeItem(id));
+        console.log(cartContent.children);
+
+        while (cartContent.children.length > 0) {
+            cartContent.removeChild(cartContent.children[0]);
+        }
+
+        this.hideCart();
+    }
+
+    removeItem(id) {
+        cart = cart.filter(item => item.id !== id);
+        this.setCartValues(cart);
+        Storage.saveCart(cart);
+        let button = this.getSingleButton(id);
+        button.disabled = false;
+        button.innerHTML = `<i class="fas fa-shopping-cart"></i>add to cart`;
+    }
+
+    getSingleButton(id) {
+        return buttonsDom.find(button => button.dataset.id === id);
+    }
+
 }
 
 // local storage
@@ -197,5 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
         Storage.saveProducts(products);
     }).then(() => {
         ui.getBagButtons();
+        ui.cartLogic();
     });
 });
