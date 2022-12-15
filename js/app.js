@@ -161,8 +161,55 @@ class UI {
 
     // cart logic 
     cartLogic() {
+        // clear cart button
         clearCartBtn.addEventListener('click', () => {
             this.clearCart();
+        });
+
+        // single item functionality (remove, increase, decrease) in cart
+        cartContent.addEventListener('click', event => {
+            if (event.target.classList.contains("remove-item")) {
+                let removeItem = event.target; // get target element of clickEventListner
+                let id = removeItem.dataset.id;
+
+                // remove item from localStorage and it's DOM Element from parent element
+                cartContent.removeChild(removeItem.parentElement.parentElement);
+                this.removeItem(id);
+            }
+            else if (event.target.classList.contains("fa-chevron-up")) {
+                let addAmountElement = event.target; // get target element of clickEventListner
+                let id = addAmountElement.dataset.id; // get target element's id
+                
+                // get item from cart array
+                let itemInCart =  cart.find(item => item.id === id);
+                itemInCart.amount = itemInCart.amount + 1;
+
+                Storage.saveCart(cart);
+                this.setCartValues(cart);
+
+                // get target element of ClickEventListener's nextElementSibling and update item count value in UI
+                addAmountElement.nextElementSibling.innerText = itemInCart.amount;
+            }
+            else if (event.target.classList.contains("fa-chevron-down")) {
+                let lowerAmountElement = event.target;
+                let id = lowerAmountElement.dataset.id;
+
+                // get item from cart array
+                let itemInCart = cart.find(item => item.id === id);
+                itemInCart.amount = itemInCart.amount - 1;
+
+                if (itemInCart.amount > 0) {
+                    Storage.saveCart(cart);
+                    this.setCartValues(cart);
+
+                    // get target element of ClickEventListener's nextElementSibling and update item count value in UI
+                    lowerAmountElement.previousElementSibling.innerText = itemInCart.amount;
+                } else {
+                    cartContent.removeChild(lowerAmountElement.parentElement.parentElement);
+                    this.removeItem(id);
+                }
+            }
+            
         })
     }
 
